@@ -1,0 +1,57 @@
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 500px; /* Высота контейнера */
+  overflow: hidden; /* Прячем прокрутку по умолчанию */
+  border: 1px solid #ddd;
+}
+
+.image-container img {
+  display: block;
+  max-width: 100%;
+}
+
+.area {
+  position: absolute;
+  border: 2px solid red;
+  pointer-events: none; /* Сегмент недоступен для кликов */
+}
+
+.remove-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: rgba(255, 255, 255, 0.6);
+  border: none;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.7;
+  pointer-events: auto; /* Разрешаем клики на кнопке */
+  transition: opacity 0.2s ease;
+}
+
+.remove-btn:hover {
+  opacity: 1;
+  background-color: rgba(255, 0, 0, 0.8);
+  color: white;
+}
+
+.current-area {
+  position: absolute;
+  border: 2px dashed blue;
+  pointer-events: none;
+}
+
+.resize-handle {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  background-color: rgba(0, 0, 255, 0.7);
+  cursor: nwse-resize;
+  border-radius: 50%;
+  pointer-events: auto; /* Разрешаем клики на кнопке */
+}
