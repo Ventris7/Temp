@@ -1,0 +1,22 @@
+# Получаем все .csproj файлы в решении
+$csprojFiles = Get-ChildItem -Recurse -Filter "*.csproj"
+
+# Инициализируем массив для хранения пакетов и их версий
+$packages = @()
+
+# Читаем каждый .csproj файл
+foreach ($file in $csprojFiles) {
+    [xml]$csproj = Get-Content $file.FullName
+    $csproj.Project.ItemGroup.PackageReference | ForEach-Object {
+        $packages += [PSCustomObject]@{
+            Package = $_.Include
+            Version = $_.Version
+        }
+    }
+}
+
+# Получаем уникальные пакеты с версиями
+$uniquePackages = $packages | Sort-Object Package, Version | Get-Unique
+
+# Выводим результат
+$uniquePackages | Format-Table Package, Version
