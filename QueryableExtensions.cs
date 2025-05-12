@@ -1,64 +1,96 @@
-namespace Lims.Core.UseCases.Process.Orders.Commands.RegistrateOrders.Checks;
+namespace Lims.Core.Domain.Extensions;
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Lims.Core.Domain.Abstract;
-using Lims.Core.Domain.Base.Extensions;
-using Lims.Core.Domain.Check;
-using Lims.Core.Domain.Check.Abstract;
-using Lims.Core.Domain.Extensions;
+using Lims.Core.Domain.Entities;
+using Lims.Core.Domain.Entities.Abstract;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
-public class TargetBranchIdFlowIdObjectIdStageIdUniqueCheck : BaseCheck<RegistrateOrdersCommand>
+public static class QueryableExtensions
 {
-    private readonly ILimsDbContext limsDbContext;
-
-    public TargetBranchIdFlowIdObjectIdStageIdUniqueCheck(ILimsDbContext limsDbContext)
+    public static IQueryable<T> IncludeObject<T>(this IQueryable<T> query)
+    where T : BaseEntity
     {
-        this.limsDbContext = limsDbContext;
+        var fields = typeof(ObjMainEntity)
+            .GetProperties()
+            .Where(p => p.PropertyType.IsSubclassOf(typeof(BaseObjectEntity)))
+            .ToList();
+
+        fields.ForEach(p =>
+        {
+            query = query.Include($"Object.{p.Name}");
+        });
+
+        return query;
     }
 
-    public override async Task<CheckResult> CheckAsync(RegistrateOrdersCommand request, CancellationToken cancellationToken)
+    public static Task<bool> AnyManyAsync<TEntity, TModel>(
+        this IQueryable<TEntity> entities,
+        List<TModel> models,
+        Expression<Func<TEntity, TModel, bool>> predicate,
+        CancellationToken cancellationToken)
+        where TEntity : BaseEntity
+        where TModel : class
     {
-        if (!await this.limsDbContext.PrcsOrders
-            .AnyManyAsync(
-                request.Models,
-                (e, m) =>
-                    e.TargetBranchId == m.TargetBranchId
-                    && e.FlowId == m.FlowId
-                    && e.ObjectId == m.ObjectId
-                    && e.StageId == m.StageId,
-                cancellationToken))
+        var buildedPredicate = Expression.Lambda<Func<TEntity, bool>>(
+            BuildQueryExpression<TEntity, TModel>(models, predicate),
+            predicate.Parameters[0]);
+
+        return entities.AnyAsync(buildedPredicate, cancellationToken);
+    }
+
+    public static IQueryable<TEntity> WhereMany<TEntity, TModel>(
+        this IQueryable<TEntity> entities,
+        List<TModel> models,
+        Expression<Func<TEntity, TModel, bool>> predicate)
+        where TEntity : BaseEntity
+        where TModel : class
+    {
+        var buildedPredicate = Expression.Lambda<Func<TEntity, bool>>(
+            BuildQueryExpression<TEntity, TModel>(models, predicate),
+            predicate.Parameters[0]);
+
+        return entities.Where(buildedPredicate);
+    }
+
+    private static Expression BuildQueryExpression<TExpressionArgument, TReplaceableParameter>(
+        List<TReplaceableParameter> request,
+        Expression<Func<TExpressionArgument, TReplaceableParameter, bool>> lambdaExpression)
+    {
+        var expressions = new List<Expression>();
+        foreach (var instance in request)
         {
-            return new CheckResult();
+            var expression = new ReplacingExpressionVisitor(
+                originals: new[] { lambdaExpression.Parameters[1] },
+                replacements: new[] { Expression.Constant(instance, typeof(TReplaceableParameter)) })
+                .Visit(lambdaExpression.Body);
+            expressions.Add(expression);
         }
 
-        var failures = await this.limsDbContext.PrcsOrders
-            .AsNoTracking()
-            .WhereMany(
-                request.Models,
-                (e, m) =>
-                    e.TargetBranchId == m.TargetBranchId
-                    && e.FlowId == m.FlowId
-                    && e.ObjectId == m.ObjectId
-                    && e.StageId == m.StageId)
-            .Include(e => e.TargetBranch)
-            .Include(e => e.Flow)
-            .IncludeObject()
-            .Include(e => e.Stage)
-            .Select(e => new CheckFailure(
-                string.Empty,
-                string.Concat(
-                    $"Невозможно создать заявку для объекта '{e.Object.Kind.GetEnumDisplayName()}'",
-                    $": {e.Object.GetCaption(false)}",
-                    $" на этап '{e.Stage.Name}'",
-                    $" в ветке '{e.TargetBranch.Name}'",
-                    $", потоке '{e.Flow.Type} - {e.Flow.Year}'.",
-                    " Такая заявка уже существует. "),
-                request))
-            .ToListAsync(cancellationToken);
+        var concatExpression = ConcatExpression(ExpressionType.OrElse, expressions);
+        return concatExpression;
+    }
 
-        return new CheckResult(failures);
+    private static Expression ConcatExpression(ExpressionType type, List<Expression> expressions)
+    {
+        if (expressions.Count == 0)
+        {
+            return Expression.Equal(Expression.Constant(0), Expression.Constant(1));
+        }
+        else if (expressions.Count == 1)
+        {
+            return expressions[0];
+        }
+
+        var center = expressions.Count / 2;
+        return Expression.MakeBinary(
+            type,
+            ConcatExpression(type, expressions.Take(center).ToList()),
+            ConcatExpression(type, expressions.Skip(center).Take(expressions.Count - center).ToList()));
     }
 }
