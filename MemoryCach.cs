@@ -34,3 +34,41 @@ public class GlossaryUseCase : IGlossaryUseCase
         return items;
     }
 }
+
+using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Immutable;
+
+public class GlossaryUseCase : IGlossaryUseCase
+{
+    private readonly IMemoryCache memoryCache;
+
+    public GlossaryUseCase(IMemoryCache memoryCache)
+    {
+        this.memoryCache = memoryCache;
+    }
+
+    private Task<ImmutableArray<string>> GetGlossaryDisplayNamesAsync(string enumTypeName)
+    {
+        // Пробуем достать из кэша
+        if (memoryCache.TryGetValue(enumTypeName, out ImmutableArray<string> cached))
+            return Task.FromResult(cached);
+
+        // Если нет в кэше — создаём
+        var enumType = DomainAssemblyInfo.GetAssembly()
+            .GetEnum(DomainAssemblyInfo.GlossariesNamespace, enumTypeName)
+            ?? throw new LimsOperationException($"Справочник \"{enumTypeName}\" не найден.");
+
+        var names = enumType.GetDisplayNames().ToImmutableArray();
+
+        // Кладём без срока жизни
+        memoryCache.Set(enumTypeName, names);
+
+        return Task.FromResult(names);
+    }
+
+    public async Task<IReadOnlyList<string>> GetDisplayNamesAsync(string glossaryName)
+    {
+        var items = await GetGlossaryDisplayNamesAsync(glossaryName);
+        return items;
+    }
+}
