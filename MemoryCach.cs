@@ -72,3 +72,48 @@ public class GlossaryUseCase : IGlossaryUseCase
         return items;
     }
 }
+
+using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Immutable;
+
+public interface IGlossaryUseCase
+{
+    Task<ImmutableArray<string>> GetDisplayNamesAsync(string glossaryName);
+    void Invalidate(string glossaryName);
+}
+
+public sealed class GlossaryUseCase : IGlossaryUseCase
+{
+    private readonly IMemoryCache memoryCache;
+
+    public GlossaryUseCase(IMemoryCache memoryCache)
+    {
+        this.memoryCache = memoryCache;
+    }
+
+    /// <summary>
+    /// Возвращает имена для указанного enum.
+    /// Ключ кэша = имя enum без префиксов, значение — ImmutableArray<string>.
+    /// Данные живут до Remove() или рестарта приложения.
+    /// </summary>
+    public Task<ImmutableArray<string>> GetDisplayNamesAsync(string glossaryName)
+    {
+        return memoryCache.GetOrCreateAsync(glossaryName, entry =>
+        {
+            // Не задаём AbsoluteExpiration/SlidingExpiration — бессрочный кэш
+            var enumType = DomainAssemblyInfo.GetAssembly()
+                .GetEnum(DomainAssemblyInfo.GlossariesNamespace, glossaryName)
+                ?? throw new LimsOperationException($"Справочник \"{glossaryName}\" не найден.");
+
+            // GetDisplayNames гарантированно не возвращает null
+            var names = enumType.GetDisplayNames().ToImmutableArray();
+
+            return Task.FromResult(names);
+        });
+    }
+
+    /// <summary>
+    /// Удаляет элемент из кэша, чтобы при следующем запросе пересоздать.
+    /// </summary>
+    public void Invalidate(string glossaryName) => memoryCache.Remove(glossaryName);
+}
