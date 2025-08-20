@@ -30,7 +30,7 @@ return (
 
 }, (prev, next) => prev.item === next.item && prev.selected === next.selected );
 
-export function SelectableList<T>(props: SelectableListProps<T>) { const { items, getKey, renderItem, selectedKeys: controlledKeys, defaultSelectedKeys, onChange, multiselect = true, className, } = props;
+export const SelectableList = <T,>(props: SelectableListProps<T>) => { const { items, getKey, renderItem, selectedKeys: controlledKeys, defaultSelectedKeys, onChange, multiselect = true, className, } = props;
 
 const [selected, setSelected] = useControllableSelection( controlledKeys, defaultSelectedKeys );
 
@@ -59,13 +59,13 @@ if (multiselect) {
 
 const rows = useMemo(() => { return items.map((item) => { const key = getKey(item); const isSelected = selected.has(key); return { key, item, isSelected } as const; }); }, [items, getKey, selected]);
 
-return ( <ul role="listbox" className={"grid gap-1 " + (className ?? "")} aria-multiselectable={multiselect || undefined} > {rows.map(({ key, item, isSelected }) => ( <Row key={String(key)} item={item} selected={isSelected} onToggle={() => toggleKey(key)} renderItem={renderItem} /> ))} </ul> ); }
+return ( <ul role="listbox" className={"grid gap-1 " + (className ?? "")} aria-multiselectable={multiselect || undefined} > {rows.map(({ key, item, isSelected }) => ( <Row key={String(key)} item={item} selected={isSelected} onToggle={() => toggleKey(key)} renderItem={renderItem} /> ))} </ul> ); };
 
 type User = { id: number; name: string; role: string };
 
 const demoItems: User[] = [ { id: 1, name: "Ada Lovelace", role: "Engineer" }, { id: 2, name: "Grace Hopper", role: "Admiral" }, { id: 3, name: "Linus Torvalds", role: "Hacker" }, ];
 
-export default function Demo() { const [controlled, setControlled] = useState<Set<KeyLike>>(new Set([2]));
+const Demo: React.FC = () => { const [controlled, setControlled] = useState<Set<KeyLike>>(new Set([2]));
 
 return ( <div className="p-4 max-w-xl mx-auto"> <h1 className="text-2xl font-semibold mb-3">SelectableList — Demo</h1>
 
@@ -91,3 +91,4 @@ return ( <div className="p-4 max-w-xl mx-auto"> <h1 className="text-2xl font-sem
 
 ); }
 
+export default Demo
