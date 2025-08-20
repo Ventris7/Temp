@@ -10,25 +10,13 @@ React.useEffect(() => { if (controlled) setInner(controlled); }, [controlled]);
 
 return [controlled ?? inner, setInner] as const; }
 
-const Row = React.memo( <T,>(props: { item: T; selected: boolean; onToggle: () => void; renderItem: (item: T) => React.ReactNode; }) => { const { item, selected, onToggle, renderItem } = props;
+type RowProps<T> = { item: T; selected: boolean; onToggle: () => void; renderItem: (item: T) => React.ReactNode; };
 
-return (
-  <li
-    role="option"
-    aria-selected={selected}
-    onClick={onToggle}
-    className={
-      "cursor-pointer select-none rounded-xl px-3 py-2 transition-colors " +
-      (selected
-        ? "bg-blue-100 ring-2 ring-blue-300"
-        : "hover:bg-gray-50")
-    }
-  >
-    {renderItem(item)}
-  </li>
-);
+type RowProps<T> = { item: T; selected: boolean; onToggle: () => void; renderItem: (item: T) => React.ReactNode; };
 
-}, (prev, next) => prev.item === next.item && prev.selected === next.selected );
+function RowInner<T>({ item, selected, onToggle, renderItem }: RowProps<T>) { return ( <li role="option" aria-selected={selected} onClick={onToggle} className={ "cursor-pointer select-none rounded-xl px-3 py-2 transition-colors " + (selected ? "bg-blue-100 ring-2 ring-blue-300" : "hover:bg-gray-50") } > {renderItem(item)} </li> ); }
+
+const Row = React.memo(RowInner) as unknown as <T>( props: RowProps<T> ) => React.ReactElement | null; }, (prev, next) => prev.item === next.item && prev.selected === next.selected);
 
 export const SelectableList = <T,>(props: SelectableListProps<T>) => { const { items, getKey, renderItem, selectedKeys: controlledKeys, defaultSelectedKeys, onChange, multiselect = true, className, } = props;
 
@@ -59,7 +47,7 @@ if (multiselect) {
 
 const rows = useMemo(() => { return items.map((item) => { const key = getKey(item); const isSelected = selected.has(key); return { key, item, isSelected } as const; }); }, [items, getKey, selected]);
 
-return ( <ul role="listbox" className={"grid gap-1 " + (className ?? "")} aria-multiselectable={multiselect || undefined} > {rows.map(({ key, item, isSelected }) => ( <Row key={String(key)} item={item} selected={isSelected} onToggle={() => toggleKey(key)} renderItem={renderItem} /> ))} </ul> ); };
+return ( <ul role="listbox" className={"grid gap-1 " + (className ?? "")} aria-multiselectable={multiselect || undefined} > {rows.map(({ key, item, isSelected }) => ( <Row<T> key={String(key)} item={item} selected={isSelected} onToggle={() => toggleKey(key)} renderItem={renderItem} /> ))} </ul> ); };
 
 type User = { id: number; name: string; role: string };
 
@@ -91,4 +79,5 @@ return ( <div className="p-4 max-w-xl mx-auto"> <h1 className="text-2xl font-sem
 
 ); }
 
-export default Demo
+export default Demo;
+
