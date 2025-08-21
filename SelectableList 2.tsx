@@ -1,81 +1,37 @@
-import React, {useCallback, useMemo, useRef, useState} from "react";
+const prevKeysRef = useRef<Set<number> | null>(null);
 
-export type KeyLike = string | number;
+useEffect(() => {
+  // В контролируемом режиме ничего не трогаем
+  if (control) return;
 
-export type SelectableListProps<T> = { items: readonly T[]; getKey: (item: T) => KeyLike; renderItem: (item: T) => React.ReactNode; selectedKeys?: ReadonlySet<KeyLike>; defaultSelectedKeys?: ReadonlySet<KeyLike>; onChange?: (next: ReadonlySet<KeyLike>) => void; multiselect?: boolean; className?: string; };
+  const keysNow = new Set(items.map((it) => getKeyRef.current!(it)));
 
-function useControllableSelection( controlled: ReadonlySet<KeyLike> | undefined, defaultSet: ReadonlySet<KeyLike> | undefined ) { const [inner, setInner] = useState<ReadonlySet<KeyLike>>( () => controlled ?? defaultSet ?? new Set() );
-
-React.useEffect(() => { if (controlled) setInner(controlled); }, [controlled]);
-
-return [controlled ?? inner, setInner] as const; }
-
-type RowProps<T> = { item: T; selected: boolean; onToggle: () => void; renderItem: (item: T) => React.ReactNode; };
-
-function RowInner<T>({ item, selected, onToggle, renderItem }: RowProps<T>) { return ( <li role="option" aria-selected={selected} onClick={onToggle} className={ "cursor-pointer select-none rounded-xl px-3 py-2 transition-colors " + (selected ? "bg-blue-100 ring-2 ring-blue-300" : "hover:bg-gray-50") } > {renderItem(item)} </li> ); }
-
-const Row = React.memo(RowInner) as <T>( props: RowProps<T> ) => React.ReactElement | null;
-
-export const SelectableList = <T,>(props: SelectableListProps<T>) => { const { items, getKey, renderItem, selectedKeys: controlledKeys, defaultSelectedKeys, onChange, multiselect = true, className, } = props;
-
-const [selected, setSelected] = useControllableSelection( controlledKeys, defaultSelectedKeys );
-
-const onChangeRef = useRef(onChange); onChangeRef.current = onChange;
-
-const toggleKey = useCallback( (key: KeyLike) => { const next = new Set(selected);
-
-if (multiselect) {
-    if (next.has(key)) next.delete(key);
-    else next.add(key);
-  } else {
-    if (next.has(key) && next.size === 1) {
-      next.clear();
-    } else {
-      next.clear();
-      next.add(key);
+  if (items.length === 0) {
+    // Если это первый рендер (prevKeysRef ещё null) → ничего не делаем,
+    // даём отработать defaultSelection из useState
+    if (prevKeysRef.current === null) {
+      prevKeysRef.current = keysNow;
+      return;
     }
+    // Иначе (после загрузки и очистки списка) сбрасываем выбор
+    setSelection((prev) => (prev.size === 0 ? prev : new Set()));
+    prevKeysRef.current = keysNow;
+    return;
   }
 
-  setSelected(next);
-  onChangeRef.current?.(next);
-},
-[selected, multiselect, setSelected]
+  // Чистим только если набор ключей реально изменился
+  const prevKeys = prevKeysRef.current;
+  prevKeysRef.current = keysNow;
 
-);
+  const keysUnchanged =
+    prevKeys !== null &&
+    prevKeys.size === keysNow.size &&
+    [...keysNow].every((k) => prevKeys.has(k));
 
-const rows = useMemo(() => { return items.map((item) => { const key = getKey(item); const isSelected = selected.has(key); return { key, item, isSelected } as const; }); }, [items, getKey, selected]);
+  if (keysUnchanged) return;
 
-return ( <ul role="listbox" className={"grid gap-1 " + (className ?? "")} aria-multiselectable={multiselect || undefined} > {rows.map(({ key, item, isSelected }) => ( <Row key={String(key)} item={item} selected={isSelected} onToggle={() => toggleKey(key)} renderItem={renderItem} /> ))} </ul> ); };
-
-type User = { id: number; name: string; role: string };
-
-const demoItems: User[] = [ { id: 1, name: "Ada Lovelace", role: "Engineer" }, { id: 2, name: "Grace Hopper", role: "Admiral" }, { id: 3, name: "Linus Torvalds", role: "Hacker" }, ];
-
-const Demo: React.FC = () => { const [controlled, setControlled] = useState<Set<KeyLike>>(new Set([2]));
-
-return ( <div className="p-4 max-w-xl mx-auto"> <h1 className="text-2xl font-semibold mb-3">SelectableList — Demo</h1>
-
-<div className="mb-2 text-sm opacity-70">
-    Controlled selection (click to toggle; multi-select on): {" "}
-    {[...controlled].join(", ") || "∅"}
-  </div>
-
-  <SelectableList<User>
-    items={demoItems}
-    getKey={(u) => u.id}
-    renderItem={(u) => (
-      <div className="flex items-center justify-between">
-        <span className="font-medium">{u.name}</span>
-        <span className="text-xs opacity-70">{u.role}</span>
-      </div>
-    )}
-    selectedKeys={controlled}
-    onChange={(next) => setControlled(new Set(next))}
-    multiselect
-  />
-</div>
-
-); }
-
-export default Demo;
-
+  setSelection((prev) => {
+    const next = new Set([...prev].filter((k) => keysNow.has(k)));
+    return equalSets(next, prev) ? prev : next;
+  });
+}, [items, control, setSelection]);
