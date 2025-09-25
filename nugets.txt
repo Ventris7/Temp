@@ -1,0 +1,47 @@
+Вот готовые списки с прямыми ссылками на скачивание .nupkg через NuGet API v2.
+
+
+---
+
+📦 Для .NET 6 (ссылки https://www.nuget.org/api/v2/package/{id}/{version})
+
+SonarAnalyzer.CSharp — 10.15.0.120848 — https://www.nuget.org/api/v2/package/SonarAnalyzer.CSharp/10.15.0.120848
+
+StyleCop.Analyzers — 1.1.118 — https://www.nuget.org/api/v2/package/StyleCop.Analyzers/1.1.118
+
+Microsoft.AspNetCore.Authentication.JwtBearer — 6.0.36 — https://www.nuget.org/api/v2/package/Microsoft.AspNetCore.Authentication.JwtBearer/6.0.36
+
+System.Configuration.ConfigurationManager — 7.0.0 — https://www.nuget.org/api/v2/package/System.Configuration.ConfigurationManager/7.0.0
+
+coverlet.collector — 6.0.4 — https://www.nuget.org/api/v2/package/coverlet.collector/6.0.4
+
+xunit.extensibility.core — 2.9.3 — https://www.nuget.org/api/v2/package/xunit.extensibility.core/2.9.3
+
+xunit.extensibility.execution — 2.9.3 — https://www.nuget.org/api/v2/package/xunit.extensibility.execution/2.9.3
+
+
+
+---
+
+📦 Для .NET 8 (ссылки https://www.nuget.org/api/v2/package/{id}/{version})
+
+SonarAnalyzer.CSharp — 10.15.0.120848 — https://www.nuget.org/api/v2/package/SonarAnalyzer.CSharp/10.15.0.120848
+
+StyleCop.Analyzers — 1.1.118 — https://www.nuget.org/api/v2/package/StyleCop.Analyzers/1.1.118
+
+Microsoft.AspNetCore.Authentication.JwtBearer — 8.0.13 — https://www.nuget.org/api/v2/package/Microsoft.AspNetCore.Authentication.JwtBearer/8.0.13
+
+System.Configuration.ConfigurationManager — 9.0.9 — https://www.nuget.org/api/v2/package/System.Configuration.ConfigurationManager/9.0.9
+
+coverlet.collector — 6.0.4 — https://www.nuget.org/api/v2/package/coverlet.collector/6.0.4
+
+xunit.extensibility.core — 2.9.3 — https://www.nuget.org/api/v2/package/xunit.extensibility.core/2.9.3
+
+xunit.extensibility.execution — 2.9.3 — https://www.nuget.org/api/v2/package/xunit.extensibility.execution/2.9.3
+
+
+
+---
+
+Нужен Directory.Packages.props с этими версиями (готовый файл) или ZIP с .nupkg-ами скачанными локально — соберу прямо сейчас и дам ссылку. Что предпочитаешь?
+
