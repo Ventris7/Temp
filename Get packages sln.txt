@@ -1,22 +1,57 @@
-# Получаем все .csproj файлы в решении
-$csprojFiles = Get-ChildItem -Recurse -Filter "*.csproj"
-
-# Инициализируем массив для хранения пакетов и их версий
-$packages = @()
-
-# Читаем каждый .csproj файл
-foreach ($file in $csprojFiles) {
-    [xml]$csproj = Get-Content $file.FullName
-    $csproj.Project.ItemGroup.PackageReference | ForEach-Object {
-        $packages += [PSCustomObject]@{
-            Package = $_.Include
-            Version = $_.Version
-        }
-    }
-}
-
-# Получаем уникальные пакеты с версиями
-$uniquePackages = $packages | Sort-Object Package, Version | Get-Unique
-
-# Выводим результат
-$uniquePackages | Format-Table Package, Version
+C:\Users\Shabanov_IV\Desktop\log nuget errors.txt
+  29,102: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Domain\Lims.Core.Domain.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Mi
+  31,102: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Queues\Lims.Core.Queues.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Mi
+  33,128: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.SkiaSharp\Lims.Infrastructure.SkiaSharp.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следую
+  35,102: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Domain\Lims.Core.Domain.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Micr
+  37,102: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Queues\Lims.Core.Queues.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Micr
+  39,88: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core\Lims.Core.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Microsoft Visual
+  41,128: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.SkiaSharp\Lims.Infrastructure.SkiaSharp.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующи
+  43,88: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core\Lims.Core.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Microsoft Visual S
+  50,122: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Common\Lims.Infrastructure.Common.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих ис 
+  52,122: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Common\Lims.Infrastructure.Common.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих исто 
+  58,118: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Auth\Lims.Infrastructure.Auth.csproj : error NU1102: Не удалось найти пакет Microsoft.AspNetCore.Authentication.JwtBearer с версией (>= 6.0.21) [C:\_WORKSPACE\ 
+  64,118: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Auth\Lims.Infrastructure.Auth.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источн 
+  66,118: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Auth\Lims.Infrastructure.Auth.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источник 
+  68,118: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Auth\Lims.Infrastructure.Auth.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPACE\_REPO 
+  76,126: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.RabbitMq\Lims.Infrastructure.RabbitMq.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующи 
+  78,126: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.RabbitMq\Lims.Infrastructure.RabbitMq.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих  
+  90,94: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Web.Api\Lims.Web.Api.csproj : error NU1102: Не удалось найти пакет Microsoft.AspNetCore.Authentication.JwtBearer с версией (>= 6.0.21) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Pet 
+  96,94: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Web.Api\Lims.Web.Api.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Microsoft  
+  98,94: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Web.Api\Lims.Web.Api.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Microsoft Vi 
+  100,94: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Web.Api\Lims.Web.Api.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis 
+  112,114: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests.Common\Lims.Core.Tests.Common.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPACE\_REPOSITO 
+  130,100: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests\Lims.Core.Tests.csproj : error NU1102: Не удалось найти пакет coverlet.collector с версией (>= 3.2.0) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Petrolis.sl 
+  136,100: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests\Lims.Core.Tests.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Pe 
+  142,100: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests\Lims.Core.Tests.csproj : error NU1102: Не удалось найти пакет xunit.extensibility.core с версией (= 2.4.2) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Petrol
+  148,100: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests\Lims.Core.Tests.csproj : error NU1102: Не удалось найти пакет xunit.extensibility.execution с версией (= 2.4.2) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.P 
+  176,126: c:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Database\Lims.Infrastructure.Database.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующи 
+  178,126: c:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Database\Lims.Infrastructure.Database.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих  
+  180,126: c:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Database\Lims.Infrastructure.Database.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPA 
+  272,102: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Domain\Lims.Core.Domain.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Mi 
+  274,102: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Queues\Lims.Core.Queues.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Mi 
+  276,128: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.SkiaSharp\Lims.Infrastructure.SkiaSharp.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следую 
+  278,102: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Domain\Lims.Core.Domain.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Micr 
+  280,102: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Queues\Lims.Core.Queues.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Micr 
+  282,88: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core\Lims.Core.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Microsoft Visual 
+  284,128: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.SkiaSharp\Lims.Infrastructure.SkiaSharp.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующи 
+  286,88: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core\Lims.Core.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Microsoft Visual S 
+  288,122: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Common\Lims.Infrastructure.Common.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих ис 
+  290,122: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Common\Lims.Infrastructure.Common.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих исто 
+  292,118: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Auth\Lims.Infrastructure.Auth.csproj : error NU1102: Не удалось найти пакет Microsoft.AspNetCore.Authentication.JwtBearer с версией (>= 6.0.21) [C:\_WORKSPACE\ 
+  298,118: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Auth\Lims.Infrastructure.Auth.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источн 
+  300,118: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Auth\Lims.Infrastructure.Auth.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источник 
+  302,118: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Auth\Lims.Infrastructure.Auth.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPACE\_REPO 
+  308,126: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.RabbitMq\Lims.Infrastructure.RabbitMq.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующи 
+  310,126: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.RabbitMq\Lims.Infrastructure.RabbitMq.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих  
+  312,94: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Web.Api\Lims.Web.Api.csproj : error NU1102: Не удалось найти пакет Microsoft.AspNetCore.Authentication.JwtBearer с версией (>= 6.0.21) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Pet 
+  318,94: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Web.Api\Lims.Web.Api.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Microsoft  
+  320,94: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Web.Api\Lims.Web.Api.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих источниках пакетов: Microsoft Vi 
+  322,94: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Web.Api\Lims.Web.Api.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis 
+  328,114: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests.Common\Lims.Core.Tests.Common.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPACE\_REPOSITO 
+  334,100: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests\Lims.Core.Tests.csproj : error NU1102: Не удалось найти пакет coverlet.collector с версией (>= 3.2.0) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Petrolis.sl 
+  340,100: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests\Lims.Core.Tests.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Pe 
+  346,100: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests\Lims.Core.Tests.csproj : error NU1102: Не удалось найти пакет xunit.extensibility.core с версией (= 2.4.2) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Petrol 
+  352,100: C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Core.Tests\Lims.Core.Tests.csproj : error NU1102: Не удалось найти пакет xunit.extensibility.execution с версией (= 2.4.2) [C:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.P 
+  358,126: c:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Database\Lims.Infrastructure.Database.csproj : error NU1101: Не удалось найти пакет SonarAnalyzer.CSharp. Пакеты с таким идентификатором отсутствуют в следующи
+  360,126: c:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Database\Lims.Infrastructure.Database.csproj : error NU1101: Не удалось найти пакет StyleCop.Analyzers. Пакеты с таким идентификатором отсутствуют в следующих  
+  362,126: c:\_WORKSPACE\_REPOSITORY_GIT\Lims.Petrolis\Lims.Infrastructure.Database\Lims.Infrastructure.Database.csproj : error NU1102: Не удалось найти пакет System.Configuration.ConfigurationManager с версией (>= 7.0.0) [C:\_WORKSPA 
