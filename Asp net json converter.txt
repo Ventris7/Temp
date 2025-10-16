@@ -1,0 +1,120 @@
+Коротко: System.Text.Json не умеет «угадывать» тип для object и положит туда JsonElement. Чтобы получать сразу int/long/decimal/string/bool/..., добавьте свой JsonConverter<object> и подключите его в MVC.
+
+Вот рабочий вариант.
+
+1) Модель
+
+public sealed class Model
+{
+    public object? Value { get; set; }
+}
+
+2) Конвертер «object → конкретные типы»
+
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+public sealed class ObjectToPrimitivesConverter : JsonConverter<object?>
+{
+    public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        switch (reader.TokenType)
+        {
+            case JsonTokenType.Null:
+                return null;
+
+            case JsonTokenType.String:
+                // Попробуем дату, иначе строка
+                if (reader.TryGetDateTime(out var dt)) return dt;
+                return reader.GetString();
+
+            case JsonTokenType.True:
+            case JsonTokenType.False:
+                return reader.GetBoolean();
+
+            case JsonTokenType.Number:
+                // Сначала целое → long, иначе decimal (если не получилось — double)
+                if (reader.TryGetInt64(out var l)) return l;
+                if (reader.TryGetDecimal(out var dec)) return dec;
+                return reader.GetDouble();
+
+            case JsonTokenType.StartObject:
+                // Вложенные объекты → словарь
+                return JsonSerializer.Deserialize<Dictionary<string, object?>>(ref reader, options);
+
+            case JsonTokenType.StartArray:
+                // Массивы → список
+                return JsonSerializer.Deserialize<List<object?>>(ref reader, options);
+
+            default:
+                // На всякий случай — клон JsonElement
+                using (var doc = JsonDocument.ParseValue(ref reader))
+                    return doc.RootElement.Clone();
+        }
+    }
+
+    public override void Write(Utf8JsonWriter writer, object? value, JsonSerializerOptions options)
+    {
+        if (value is null)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+
+        // Сериализуем по фактическому типу
+        JsonSerializer.Serialize(writer, value, value.GetType(), options);
+    }
+}
+
+3) Регистрация в ASP.NET Core
+
+// Program.cs
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(opts =>
+{
+    // ВАЖНО: добавить конвертер до использования
+    opts.SerializerOptions.Converters.Add(new ObjectToPrimitivesConverter());
+});
+
+> Если вы используете AddControllers(), вместо этого:
+
+
+
+builder.Services.AddControllers().AddJsonOptions(opts =>
+{
+    opts.JsonSerializerOptions.Converters.Add(new ObjectToPrimitivesConverter());
+});
+
+4) Пример контроллера для проверки
+
+[ApiController]
+[Route("api/[controller]")]
+public class DemoController : ControllerBase
+{
+    [HttpPost]
+    public IActionResult Post([FromBody] Model model)
+    {
+        var typeName = model.Value?.GetType().FullName ?? "null";
+        return Ok(new { type = typeName, value = model.Value });
+    }
+}
+
+Теперь запросы:
+
+{ "Value": 5 } → Value is long (Int64)
+
+{ "Value": 5.5 } → Value is decimal (если число слишком «длинное» для decimal — упадёт в double, но в примере мы сначала пробуем decimal)
+
+{ "Value": "тест" } → Value is string
+
+
+Заметки
+
+JSON всегда использует точку как разделитель дробной части, культура не влияет — TryGetDecimal корректно парсит.
+
+Если хотите всегда получать double для дробных чисел (не decimal), поменяйте порядок: сначала TryGetDouble, потом TryGetDecimal.
+
+Для вложенных структур (объекты/массивы) вы получите Dictionary<string, object?> и List<object?> с тем же «умным» приведением внутри.
+
+Альтернатива без конвертера — сделать Value типом JsonElement и разбирать вручную, но конвертер удобнее.
+
+
