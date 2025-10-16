@@ -1,0 +1,43 @@
+import React, { useState } from 'react';
+import { InputNumber } from 'antd';
+
+export default function AmountInput() {
+  const [value, setValue] = useState<number | null>(null);
+
+  return (
+    <InputNumber
+      value={value}
+      onChange={setValue}
+      step={0.01}
+      precision={2}
+      // Не даём ввести ничего кроме цифр и точки/запятой
+      parser={(val) => {
+        if (!val) return '';
+        // Заменяем запятую на точку
+        let clean = val.replace(',', '.');
+
+        // Убираем все символы кроме цифр и точки
+        clean = clean.replace(/[^0-9.]/g, '');
+
+        // Если больше одной точки — оставляем первую
+        const firstDot = clean.indexOf('.');
+        if (firstDot !== -1) {
+          clean =
+            clean.slice(0, firstDot + 1) +
+            clean.slice(firstDot + 1).replace(/\./g, '');
+        }
+
+        // Ограничиваем до двух знаков после точки
+        const match = clean.match(/^(\d+)(?:\.(\d{0,2})?)?/);
+        return match ? match[1] + (match[2] ? '.' + match[2] : '') : clean;
+      }}
+      // Опционально — формат отображения с 2 знаками
+      formatter={(val) => {
+        if (val == null || val === '') return '';
+        const num = Number(val);
+        return isNaN(num) ? '' : num.toFixed(2);
+      }}
+      style={{ width: 150 }}
+    />
+  );
+}
