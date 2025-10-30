@@ -1,0 +1,4 @@
+builder.HasCheckConstraint(
+    "chk_result_method_version_consistency",
+    "(result IS NULL AND method_id IS NULL AND version IS NULL) OR (result IS NOT NULL AND method_id IS NOT NULL AND version IS NOT NULL AND result ? 'methodId' AND result ? 'version' AND jsonb_typeof(result->'methodId') = 'number' AND jsonb_typeof(result->'version') = 'number' AND (result ->> 'methodId')::int = method_id AND (result ->> 'version')::int = version)"
+);
