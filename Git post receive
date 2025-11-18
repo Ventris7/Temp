@@ -1,0 +1,35 @@
+#!/bin/bash
+set -e
+
+REPO="/srv/git/myapp.git"
+WORK_TREE="/var/www/myapp"
+BUILD_DIR="$WORK_TREE/build"
+TARGET_DIR="/var/www/html/myapp"
+BRANCH="master"
+
+# читаем старый/новый SHA и ref из stdin
+while read oldrev newrev ref
+do
+  # интересуемся только master’ом
+  if [ "$ref" = "refs/heads/$BRANCH" ]; then
+    echo "[deploy] Обновился $BRANCH, деплоим..."
+
+    # обновляем рабочую копию
+    GIT_DIR="$REPO" GIT_WORK_TREE="$WORK_TREE" git checkout -f "$BRANCH"
+    cd "$WORK_TREE"
+
+    # ставим зависимости (если уже ставил ранее, будет быстро)
+    echo "[deploy] npm ci"
+    npm ci --silent
+
+    echo "[deploy] npm run build"
+    npm run build
+
+    # копируем билд в папку, откуда отдает веб-сервер
+    echo "[deploy] rsync в $TARGET_DIR"
+    mkdir -p "$TARGET_DIR"
+    rsync -a --delete "$BUILD_DIR"/ "$TARGET_DIR"/
+
+    echo "[deploy] Готово."
+  fi
+done
