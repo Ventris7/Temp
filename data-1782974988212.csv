@@ -1,0 +1,8 @@
+"QUERY PLAN"
+"Nested Loop  (cost=777.53..9009.60 rows=77400 width=304)"
+"  ->  Bitmap Heap Scan on prcs_task t  (cost=777.53..3011.10 rows=774 width=710)"
+"        Recheck Cond: (method_name = 'ProfileResearchResult'::text)"
+"        Filter: (((result ->> 'permeabilityMeasurements'::text) IS NOT NULL) AND (status = 'Завершено'::text))"
+"        ->  Bitmap Index Scan on ix_prcs_task_method_id_method_name  (cost=0.00..777.33 rows=800 width=0)"
+"              Index Cond: (method_name = 'ProfileResearchResult'::text)"
+"  ->  Function Scan on jsonb_array_elements permeabilities  (cost=0.01..1.00 rows=100 width=32)"
