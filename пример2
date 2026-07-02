@@ -1,0 +1,25 @@
+SELECT
+                -- t.*,
+    t.id AS "TaskId",
+                t.object_id AS "GougeId",
+                
+                result->>'permeabilityPoints',
+                (permeabilities->>'Depth')::NUMERIC AS "Depth",
+                (permeabilities->>'deltaDepth')::NUMERIC AS "DeltaDepth",
+                (permeabilities->>'deltaWidth')::NUMERIC AS "DeltaWidth",
+                (permeabilities->>'typeMeasurement')::TEXT AS "TypeMeasurement",
+                (permeabilities->>'pressure')::NUMERIC AS "Pressure",
+                (permeabilities->>'permeability')::NUMERIC AS "Permeability",
+                (permeabilities->>'codeMeasurement')::NUMERIC AS "CodeMeasurement",
+                (permeabilities->>'flow')::NUMERIC AS "Flow"
+FROM
+                LIMS.PRCS_TASK T
+                CROSS JOIN LATERAL jsonb_array_elements(result->'permeabilityMeasurements') as permeabilities
+WHERE
+                T.METHOD_NAME = 'ProfileResearchResult'
+                and T.STATUS='Завершено'
+                AND T.RESULT ->>'permeabilityMeasurements' is not null;
+
+
+Гам
+
