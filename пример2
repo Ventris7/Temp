@@ -21,5 +21,39 @@ WHERE
                 AND T.RESULT ->>'permeabilityMeasurements' is not null;
 
 
-Гам
+Оптимизация 1
+
+WITH filtered_tasks AS MATERIALIZED (
+    SELECT
+        t.id,
+        t.object_id,
+        t.result -> 'permeabilityMeasurements' AS measurements
+    FROM lims.prcs_task t
+    WHERE t.method_name = 'ProfileResearchResult'
+      AND t.status = 'Завершено'
+      AND t.result ? 'permeabilityMeasurements'
+      AND jsonb_typeof(t.result -> 'permeabilityMeasurements') = 'array'
+)
+SELECT
+    t.id AS "TaskId",
+    t.object_id AS "GougeId",
+    p."Depth",
+    p."deltaDepth" AS "DeltaDepth",
+    p."deltaWidth" AS "DeltaWidth",
+    p."typeMeasurement" AS "TypeMeasurement",
+    p."pressure" AS "Pressure",
+    p."permeability" AS "Permeability",
+    p."codeMeasurement" AS "CodeMeasurement",
+    p."flow" AS "Flow"
+FROM filtered_tasks t
+CROSS JOIN LATERAL jsonb_to_recordset(t.measurements) AS p(
+    "Depth" numeric,
+    "deltaDepth" numeric,
+    "deltaWidth" numeric,
+    "typeMeasurement" text,
+    "pressure" numeric,
+    "permeability" numeric,
+    "codeMeasurement" numeric,
+    "flow" numeric
+);
 
